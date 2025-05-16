@@ -4,12 +4,16 @@ import multer from 'multer';
 import path from 'path';
 import session from 'express-session';
 import fs from 'fs';
+import pool from './db.js';
 
 
 
 
 const app = express();
 const port = 3000;
+
+
+
 
 app.use(session({
   secret: 'bookstore-secret-key',
@@ -57,15 +61,7 @@ const upload = multer({
   }
 });
 
-const db = new pg.Client({
-  user: "postgres",
-  host: "localhost",
-  database: "Books",
-  password: "123",
-  port: 5432,
-  });
-  
-  db.connect();
+
   
 
 
@@ -106,16 +102,16 @@ app.get("/", async (req, res) => {
   if (!req.session.cart) req.session.cart = [];
 
   
-  const result = await db.query(`SELECT * FROM cart`);
+  const result = await pool.query(`SELECT * FROM cart`);
   const products = result.rows;
 
-  const data = await db.query(`SELECT * FROM best_seller`);
+  const data = await pool.query(`SELECT * FROM best_seller`);
   const bestSeller = data.rows;
 
-  const dataTwo = await db.query(`SELECT * FROM best_seller2`);
+  const dataTwo = await pool.query(`SELECT * FROM best_seller2`);
   const bestSellerTwo = dataTwo.rows;
 
-  const dataThree = await db.query(`SELECT * FROM best_seller3`);
+  const dataThree = await pool.query(`SELECT * FROM best_seller3`);
   const bestSellerThree = dataThree.rows;
 
   let cartCount = req.session.cart
@@ -371,7 +367,7 @@ app.post("/place_order", async (req, res) => {
 
   try {
 
-       await db.query(
+       await pool.query(
       `INSERT INTO place_order (product_name, product_author, product_price, product_image, quantity )
        VALUES ($1, $2, $3, $4, $5) RETURNING id`,
       [product_name, product_author, product_price, product_image, quantity]
@@ -403,7 +399,6 @@ app.post("/place_order", async (req, res) => {
 
 app.get('/cart', (req, res) => {
   
-  const {product_price} = req.body;
 
   let cartCount = req.session.cart
   ? req.session.cart.reduce((total, item) => total + item.quantity, 0)
@@ -469,7 +464,7 @@ app.get('/cart', (req, res) => {
         
         try {
 
-        const result = await db.query(
+        const result = await pool.query(
             "INSERT INTO books (your_name, book_title, author, opinion, books_image) VALUES ($1, $2 ,$3 , $4 , $5) RETURNING id",
             [name,title,author,opinion, newImage]
            );
@@ -479,7 +474,7 @@ app.get('/cart', (req, res) => {
 
             try {
                
-               await db.query(
+               await pool.query(
                 "INSERT INTO books_added (book_id , added_by) VALUES ($1 , $2) ",
                 [bookId,name]
                );
