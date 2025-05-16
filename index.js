@@ -1,18 +1,13 @@
 import express from 'express';
-import pg from 'pg';
 import multer from 'multer';
 import path from 'path';
 import session from 'express-session';
 import fs from 'fs';
-import pool from './db.js';
-
-
+import pool from './db.js'; 
 
 
 const app = express();
 const port = 3000;
-
-
 
 
 app.use(session({
@@ -21,6 +16,8 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false } 
 }));
+
+
 
 
 const dir = './uploadImages';
