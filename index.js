@@ -3,7 +3,7 @@ import pg from 'pg';
 import multer from 'multer';
 import path from 'path';
 import session from 'express-session';
-
+import fs from 'fs';
 
 
 
@@ -15,8 +15,15 @@ app.use(session({
   secret: 'bookstore-secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false } // Set to true if using HTTPS
+  cookie: { secure: false } 
 }));
+
+
+const dir = './uploadImages';
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir);
+}
+
 
 const storage = multer.diskStorage({
       
@@ -313,7 +320,7 @@ app.post("/add_cart", async (req, res) => {
   const { product_name, product_author, product_price, product_image, quantity,
    } = req.body;
 
-  if (!product_name || !product_author || !product_price || !product_image || quantity )  {
+  if (!product_name || !product_author || !product_price || !product_image || !quantity )  {
       return res.status(400).send("Invalid product data");
   }
   let cart = req.session.cart || [];
